@@ -1,4 +1,4 @@
-import { lazy, LazyExoticComponent, FC } from 'react'
+import type { LazyExoticComponent, FC } from 'react'
 
 export interface Widget {
   name: string
