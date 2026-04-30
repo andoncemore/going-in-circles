@@ -1,0 +1,36 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.backLink {
+  padding: 12px 24px;
+  display: inline-block;
+  text-decoration: none;
+  color: #555;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.backLink:hover {
+  color: #000;
+}
+
+.columns {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid #e5e5e5;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.main {
+  flex: 1;
+  overflow: auto;
+}
