@@ -27,6 +27,6 @@ describe('WidgetLayout', () => {
 
   it('renders a back link to the home page', () => {
     renderLayout()
-    expect(screen.getByRole('link', { name: /back to all tools/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /back to all tools/i })).toHaveAttribute('href', '/')
   })
 })
