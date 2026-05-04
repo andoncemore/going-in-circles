@@ -93,23 +93,28 @@ export default function NewsletterMap() {
   async function exportPNG() {
     if (!mapWrapperRef.current) return
     setOverlayVisible(false)
-    await sleep(500)
 
-    const { toCanvas } = await import('html-to-image')
-    const canvas = await toCanvas(mapWrapperRef.current, { pixelRatio: 2 })
+    try {
+      await sleep(500)
 
-    const ctx = canvas.getContext('2d')!
-    ctx.globalCompositeOperation = 'screen'
-    ctx.fillStyle = '#88A4AE'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.globalCompositeOperation = 'source-over'
+      const { toCanvas } = await import('html-to-image')
+      const canvas = await toCanvas(mapWrapperRef.current, { pixelRatio: 2 })
 
-    const link = document.createElement('a')
-    link.download = 'newsletter-map.png'
-    link.href = canvas.toDataURL('image/png')
-    link.click()
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
 
-    setOverlayVisible(true)
+      ctx.globalCompositeOperation = 'screen'
+      ctx.fillStyle = '#88A4AE'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.globalCompositeOperation = 'source-over'
+
+      const link = document.createElement('a')
+      link.download = 'newsletter-map.png'
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } finally {
+      setOverlayVisible(true)
+    }
   }
 
   const sidebar = (
