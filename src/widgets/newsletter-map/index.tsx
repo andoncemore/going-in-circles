@@ -1,10 +1,24 @@
 import { useState, useRef } from 'react'
-import { type Location, type GeocodeCache } from './geocode'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import type { LatLngBounds } from 'leaflet'
+import MapController from './MapController'
+import { geocode, sleep, type Location, type GeocodeCache } from './geocode'
 import WidgetLayout from '../../components/WidgetLayout'
 import styles from './styles.module.css'
 
 function makeBlankLocation(): Location {
   return { id: crypto.randomUUID(), name: '', address: '', lat: null, lng: null, error: false }
+}
+
+function createMarkerIcon(name: string, number: number) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="marker-wrap"><div class="marker-circle">${number}</div><div class="marker-label">${name}</div></div>`,
+    iconAnchor: [15, 15],
+    iconSize: [1, 1],
+  })
 }
 
 export default function NewsletterMap() {
@@ -13,11 +27,15 @@ export default function NewsletterMap() {
     makeBlankLocation(),
     makeBlankLocation(),
   ])
+  const [bounds, setBounds] = useState<LatLngBounds | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [hasMap, setHasMap] = useState(false)
+  const [overlayVisible, setOverlayVisible] = useState(true)
   const [statusMsg, setStatusMsg] = useState('')
   const geocodeCache = useRef<GeocodeCache>({})
   const mapWrapperRef = useRef<HTMLDivElement>(null)
+
+  const geocodedLocations = locations.filter(l => l.lat !== null && l.lng !== null)
 
   function addLocation() {
     if (locations.length >= 10) return
@@ -38,7 +56,39 @@ export default function NewsletterMap() {
     )
   }
 
-  async function generateMap() {}
+  async function generateMap() {
+    const filled = locations.filter(l => l.name.trim() && l.address.trim())
+    if (filled.length === 0) return
+    setIsGenerating(true)
+
+    const updated = locations.map(l => ({ ...l }))
+    let done = 0
+
+    for (let i = 0; i < updated.length; i++) {
+      const loc = updated[i]
+      if (!loc.name.trim() || !loc.address.trim()) continue
+      if (loc.lat !== null) { done++; continue }
+
+      setStatusMsg(`Geocoding ${done + 1}/${filled.length}…`)
+      const result = await geocode(loc.address, geocodeCache.current)
+      if (result) {
+        updated[i] = { ...loc, lat: result.lat, lng: result.lng, error: false }
+        done++
+      } else {
+        updated[i] = { ...loc, error: true }
+      }
+      if (i < updated.length - 1) await sleep(300)
+    }
+
+    setLocations(updated)
+    const successes = updated.filter(l => l.lat !== null && l.lng !== null)
+    if (successes.length > 0) {
+      setBounds(L.latLngBounds(successes.map(l => [l.lat!, l.lng!] as [number, number])))
+      setHasMap(true)
+    }
+    setStatusMsg(`${successes.length} location${successes.length !== 1 ? 's' : ''} mapped`)
+    setIsGenerating(false)
+  }
 
   async function exportPNG() {}
 
@@ -101,7 +151,31 @@ export default function NewsletterMap() {
     </div>
   )
 
-  const main = <div className={styles.mapWrapper} ref={mapWrapperRef} />
+  const main = (
+    <div className={styles.mapWrapper} ref={mapWrapperRef}>
+      <MapContainer
+        className={styles.map}
+        center={[39.5, -98.35]}
+        zoom={4}
+        zoomControl={false}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        />
+        {geocodedLocations.map((loc, i) => (
+          <Marker
+            key={loc.id}
+            position={[loc.lat!, loc.lng!]}
+            icon={createMarkerIcon(loc.name, i + 1)}
+          />
+        ))}
+        <MapController bounds={bounds} />
+      </MapContainer>
+      {overlayVisible && <div className={styles.colorOverlay} />}
+    </div>
+  )
 
   return <WidgetLayout sidebar={sidebar} main={main} />
 }

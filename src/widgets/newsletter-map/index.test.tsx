@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import NewsletterMap from './index'
+import { geocode } from './geocode'
 
 // mockToCanvas must be declared with vi.hoisted so it exists when vi.mock factories run
 const mockToCanvas = vi.hoisted(() => vi.fn())
@@ -87,5 +88,60 @@ describe('NewsletterMap — location list', () => {
   it('does not show the Download PNG button initially', () => {
     renderWidget()
     expect(screen.queryByText(/Download PNG/)).toBeNull()
+  })
+})
+
+describe('NewsletterMap — generate flow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('shows status text and Download button after successful generate', async () => {
+    vi.mocked(geocode).mockResolvedValue({ lat: 40.7128, lng: -74.006 })
+
+    renderWidget()
+    fireEvent.change(screen.getAllByPlaceholderText('Location name')[0], {
+      target: { value: 'City Hall' },
+    })
+    fireEvent.change(screen.getAllByPlaceholderText('Address or place name')[0], {
+      target: { value: 'New York, NY' },
+    })
+    fireEvent.click(screen.getByText('Generate Map →'))
+
+    await screen.findByText('↓ Download PNG')
+    expect(screen.getByText(/location.*mapped/i)).toBeInTheDocument()
+  })
+
+  it('shows "0 locations mapped" when all geocodes fail', async () => {
+    vi.mocked(geocode).mockResolvedValue(null)
+
+    renderWidget()
+    fireEvent.change(screen.getAllByPlaceholderText('Location name')[0], {
+      target: { value: 'Nowhere' },
+    })
+    fireEvent.change(screen.getAllByPlaceholderText('Address or place name')[0], {
+      target: { value: 'xyzzy invalid address' },
+    })
+    fireEvent.click(screen.getByText('Generate Map →'))
+
+    await screen.findByText('0 locations mapped')
+    expect(screen.queryByText('↓ Download PNG')).toBeNull()
+  })
+
+  it('skips rows with empty name or address', async () => {
+    vi.mocked(geocode).mockResolvedValue({ lat: 40.7128, lng: -74.006 })
+
+    renderWidget()
+    // Only fill the first row; rows 2 and 3 stay blank
+    fireEvent.change(screen.getAllByPlaceholderText('Location name')[0], {
+      target: { value: 'City Hall' },
+    })
+    fireEvent.change(screen.getAllByPlaceholderText('Address or place name')[0], {
+      target: { value: 'New York, NY' },
+    })
+    fireEvent.click(screen.getByText('Generate Map →'))
+
+    await screen.findByText('1 location mapped')
+    expect(geocode).toHaveBeenCalledTimes(1)
   })
 })
