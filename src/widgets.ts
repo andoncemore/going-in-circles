@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type { LazyExoticComponent, FC } from 'react'
 
 export interface Widget {
@@ -7,5 +8,11 @@ export interface Widget {
   component: LazyExoticComponent<FC>
 }
 
-// Register new widgets here. Each entry drives both the home page gallery and the router.
-export const widgets: Widget[] = []
+export const widgets: Widget[] = [
+  {
+    name: 'Newsletter Map',
+    description: 'Generate a styled map graphic for newsletters',
+    path: '/newsletter-map',
+    component: lazy(() => import('./widgets/newsletter-map')),
+  },
+]

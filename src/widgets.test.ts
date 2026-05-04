@@ -12,7 +12,9 @@ describe('widgets registry', () => {
       expect(typeof widget.description).toBe('string')
       expect(typeof widget.path).toBe('string')
       expect(widget.path).toMatch(/^\//)
-      expect(typeof widget.component).toBe('function')
+      // React lazy components are objects with _init, not plain functions
+      expect(widget.component).toBeDefined()
+      expect(typeof widget.component).toBe('object')
     })
   })
 })
