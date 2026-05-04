@@ -145,3 +145,44 @@ describe('NewsletterMap — generate flow', () => {
     expect(geocode).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('NewsletterMap — PNG export', () => {
+  it('triggers a PNG file download when Download PNG is clicked', async () => {
+    vi.mocked(geocode).mockResolvedValue({ lat: 40.7128, lng: -74.006 })
+
+    const mockCtx = {
+      globalCompositeOperation: 'source-over' as GlobalCompositeOperation,
+      fillStyle: '',
+      fillRect: vi.fn(),
+    }
+    const mockCanvas = {
+      width: 800,
+      height: 600,
+      getContext: vi.fn().mockReturnValue(mockCtx),
+      toDataURL: vi.fn().mockReturnValue('data:image/png;base64,abc'),
+    }
+    mockToCanvas.mockResolvedValue(mockCanvas)
+
+    const mockClick = vi.fn()
+    const mockLink = { download: '', href: '', click: mockClick }
+
+    renderWidget()
+    fireEvent.change(screen.getAllByPlaceholderText('Location name')[0], {
+      target: { value: 'City Hall' },
+    })
+    fireEvent.change(screen.getAllByPlaceholderText('Address or place name')[0], {
+      target: { value: 'New York, NY' },
+    })
+    fireEvent.click(screen.getByText('Generate Map →'))
+
+    const downloadBtn = await screen.findByText('↓ Download PNG')
+    vi.spyOn(document, 'createElement').mockImplementationOnce(
+      () => mockLink as unknown as HTMLElement
+    )
+    fireEvent.click(downloadBtn)
+
+    await vi.waitFor(() => expect(mockClick).toHaveBeenCalled())
+    expect(mockLink.download).toBe('newsletter-map.png')
+    expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png')
+  })
+})
