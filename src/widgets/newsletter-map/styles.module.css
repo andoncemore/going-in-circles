@@ -1,0 +1,236 @@
+.sidebarInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.description {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.locationList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.locationRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.locationBadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f2a71b;
+  color: #2c1f00;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.locationInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nameInput,
+.addressInput {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  box-sizing: border-box;
+  outline: none;
+  font-family: inherit;
+}
+
+.nameInput {
+  font-weight: 600;
+}
+
+.nameInput:focus,
+.addressInput:focus {
+  border-color: #aaa;
+}
+
+.geocoded {
+  background: #f0faf5 !important;
+  border-color: #a8d5be !important;
+  color: #2d6a4f !important;
+}
+
+.error {
+  background: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.removeBtn:hover {
+  color: #555;
+}
+
+.addBtn {
+  border: 1px dashed #ccc;
+  background: none;
+  padding: 8px;
+  border-radius: 4px;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.addBtn:hover {
+  border-color: #aaa;
+  color: #555;
+}
+
+.status {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 8px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.generateBtn {
+  padding: 10px 16px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+}
+
+.generateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.generateBtn:hover:not(:disabled) {
+  background: #333;
+}
+
+.downloadBtn {
+  padding: 10px 16px;
+  background: #f2a71b;
+  color: #2c1f00;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+}
+
+.downloadBtn:hover {
+  background: #e09a10;
+}
+
+/* Map area */
+.mapWrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.colorOverlay {
+  position: absolute;
+  inset: 0;
+  background: #88a4ae;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 400;
+}
+
+/*
+  Marker styles are injected as raw HTML strings via L.divIcon — CSS Modules
+  class name hashing doesn't apply. Must use :global() so the generated class
+  names match what's in the HTML string.
+*/
+:global(.marker-wrap) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:global(.marker-circle) {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f2a71b;
+  color: #2c1f00;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+:global(.marker-label) {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-shadow:
+    -1px -1px 0 rgba(255, 255, 255, 0.95),
+     1px -1px 0 rgba(255, 255, 255, 0.95),
+    -1px  1px 0 rgba(255, 255, 255, 0.95),
+     1px  1px 0 rgba(255, 255, 255, 0.95);
+  max-width: 140px;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* Leaflet's attribution control — Leaflet renders its own class names */
+:global(.leaflet-control-attribution) {
+  font-size: 9px !important;
+  opacity: 0.5;
+}
