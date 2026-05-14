@@ -1,73 +1,71 @@
-# React + TypeScript + Vite
+# Going in Circles
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An internal tool site for the Roundabout team — a small, growing collection of in-browser graphics generators and design utilities. Each tool ("widget") lets a team member fill in some inputs, preview output, and export it (PNG, SVG, etc.).
 
-Currently, two official plugins are available:
+Not public-facing.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Widgets
 
-## React Compiler
+- **Newsletter Map** — generates a styled map graphic for newsletters, with custom locations, aspect ratios, and a self-hosted Stamen Toner style.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Stack
 
-## Expanding the ESLint configuration
+- Vite + React 19 + TypeScript
+- React Router v7 for client-side routing between widgets
+- Vitest + React Testing Library for tests
+- Netlify for hosting (static site + serverless functions when a widget needs to proxy an API)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Local development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install       # first time only
+npm run dev       # dev server at http://localhost:5173
+npm test          # run tests
+npm run build     # production build to dist/
+npm run preview   # preview the production build locally
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+  widgets.ts          # Widget registry — add new widgets here
+  widgets/            # One subfolder per widget
+  pages/Home.tsx      # Gallery page (reads from the registry)
+  components/
+    WidgetLayout.tsx  # Shared two-column shell for widget pages
+netlify/
+  functions/          # Serverless API proxies (add per widget as needed)
+public/
+  _redirects          # Netlify SPA routing rule
+  fonts/              # Self-hosted font glyphs for the map widget
+```
+
+## Adding a new widget
+
+1. Create `src/widgets/your-widget-name/index.tsx`.
+2. Build the widget using `WidgetLayout` for the page shell — it provides a sidebar slot and a main slot. Fill them however the widget needs (live preview, generate button, export controls, etc.).
+3. Add an entry to `src/widgets.ts`:
+
+   ```ts
+   {
+     name: 'Your Widget Name',
+     description: 'Short description shown on the home page',
+     path: '/your-widget-name',
+     component: lazy(() => import('./widgets/your-widget-name')),
+   }
+   ```
+
+The home page gallery and the router pick it up automatically.
+
+## Using the Anthropic API from a widget
+
+If a widget needs to call the Anthropic API, do not call it directly from the browser — proxy through a Netlify Function so the API key stays server-side:
+
+1. Add `ANTHROPIC_API_KEY` in Netlify → Site settings → Environment variables.
+2. Add a function under `netlify/functions/` that forwards the request.
+3. Call your function from the widget.
+
+## Deployment
+
+Netlify deploys automatically on every push to `main`.
