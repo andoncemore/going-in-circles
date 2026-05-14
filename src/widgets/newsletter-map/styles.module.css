@@ -4,6 +4,81 @@
   height: 100%;
 }
 
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.select:focus {
+  border-color: #aaa;
+}
+
+.layerToggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.layerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layerToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 22px;
+}
+
+.detailSlider {
+  flex: 1;
+  accent-color: #1a1a1a;
+}
+
+.detailSlider:disabled {
+  opacity: 0.35;
+}
+
+.detailValue {
+  font-size: 11px;
+  color: #888;
+  width: 30px;
+  text-align: right;
+}
+
 .title {
   font-size: 18px;
   font-weight: 700;
@@ -174,19 +249,32 @@
 }
 
 /* Map area */
-.mapWrapper {
-  position: relative;
-  height: 100%;
+.mapArea {
+  container-type: size;
   width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
+.mapWrapper {
+  position: relative;
+  aspect-ratio: var(--ar-w) / var(--ar-h);
+  width: min(100cqw, calc(100cqh * var(--ar-w) / var(--ar-h)));
+}
+
+/* Portaled into MapLibre's canvas container so it sits above the canvas tiles
+   but below the HTML marker layer (which MapLibre places outside this container). */
 .colorOverlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: #88a4ae;
   mix-blend-mode: screen;
   pointer-events: none;
-  z-index: 400;
 }
 
 /*
@@ -206,7 +294,7 @@
   border-radius: 50%;
   background: #f2a71b;
   color: #2c1f00;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -229,8 +317,11 @@
   line-height: 1.2;
 }
 
-/* Leaflet's attribution control — Leaflet renders its own class names */
-:global(.leaflet-control-attribution) {
+:global(.maplibregl-marker) {
+  z-index: 1;
+}
+
+:global(.maplibregl-ctrl-attrib) {
   font-size: 9px !important;
   opacity: 0.5;
 }

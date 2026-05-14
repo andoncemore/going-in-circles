@@ -8,7 +8,7 @@ describe('geocode', () => {
 
   it('returns cached result without fetching', async () => {
     const cache = { 'New York': { lat: 40.7, lng: -74.0 } }
-    const fetchSpy = vi.spyOn(global, 'fetch')
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
     const result = await geocode('New York', cache)
 
@@ -18,7 +18,7 @@ describe('geocode', () => {
 
   it('fetches coordinates and stores them in cache on success', async () => {
     const cache: Record<string, { lat: number; lng: number }> = {}
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       json: () => Promise.resolve([{ lat: '40.7128', lon: '-74.0060' }]),
     } as Response)
 
@@ -30,7 +30,7 @@ describe('geocode', () => {
 
   it('returns null when Nominatim returns empty results', async () => {
     const cache: Record<string, { lat: number; lng: number }> = {}
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       json: () => Promise.resolve([]),
     } as Response)
 
@@ -41,7 +41,7 @@ describe('geocode', () => {
 
   it('returns null on network error', async () => {
     const cache: Record<string, { lat: number; lng: number }> = {}
-    vi.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('Network error'))
+    vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('Network error'))
 
     const result = await geocode('New York', cache)
 

@@ -4,28 +4,13 @@ import { MemoryRouter } from 'react-router-dom'
 import NewsletterMap from './index'
 import { geocode } from './geocode'
 
-// mockToCanvas must be declared with vi.hoisted so it exists when vi.mock factories run
-const mockToCanvas = vi.hoisted(() => vi.fn())
-
-// Mocks needed for Tasks 5–7 — set up here so Task 6/7 tests don't need to touch this section
-vi.mock('html-to-image', () => ({ toCanvas: mockToCanvas }))
-vi.mock('react-leaflet', () => ({
-  MapContainer: ({ children }: { children: React.ReactNode }) => (
+vi.mock('react-map-gl/maplibre', () => ({
+  Map: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
-  TileLayer: () => null,
   Marker: () => null,
 }))
-
-vi.mock('leaflet', () => ({
-  default: {
-    divIcon: vi.fn(() => ({})),
-    latLngBounds: vi.fn(() => ({})),
-  },
-}))
-
-vi.mock('leaflet/dist/leaflet.css', () => ({}))
-vi.mock('./MapController', () => ({ default: () => null }))
+vi.mock('maplibre-gl/dist/maplibre-gl.css', () => ({}))
 vi.mock('./geocode', () => ({
   geocode: vi.fn(),
   sleep: vi.fn().mockResolvedValue(undefined),
@@ -146,43 +131,3 @@ describe('NewsletterMap — generate flow', () => {
   })
 })
 
-describe('NewsletterMap — PNG export', () => {
-  it('triggers a PNG file download when Download PNG is clicked', async () => {
-    vi.mocked(geocode).mockResolvedValue({ lat: 40.7128, lng: -74.006 })
-
-    const mockCtx = {
-      globalCompositeOperation: 'source-over' as GlobalCompositeOperation,
-      fillStyle: '',
-      fillRect: vi.fn(),
-    }
-    const mockCanvas = {
-      width: 800,
-      height: 600,
-      getContext: vi.fn().mockReturnValue(mockCtx),
-      toDataURL: vi.fn().mockReturnValue('data:image/png;base64,abc'),
-    }
-    mockToCanvas.mockResolvedValue(mockCanvas)
-
-    const mockClick = vi.fn()
-    const mockLink = { download: '', href: '', click: mockClick }
-
-    renderWidget()
-    fireEvent.change(screen.getAllByPlaceholderText('Location name')[0], {
-      target: { value: 'City Hall' },
-    })
-    fireEvent.change(screen.getAllByPlaceholderText('Address or place name')[0], {
-      target: { value: 'New York, NY' },
-    })
-    fireEvent.click(screen.getByText('Generate Map →'))
-
-    const downloadBtn = await screen.findByText('↓ Download PNG')
-    vi.spyOn(document, 'createElement').mockImplementationOnce(
-      () => mockLink as unknown as HTMLElement
-    )
-    fireEvent.click(downloadBtn)
-
-    await vi.waitFor(() => expect(mockClick).toHaveBeenCalled())
-    expect(mockLink.download).toBe('newsletter-map.png')
-    expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png')
-  })
-})

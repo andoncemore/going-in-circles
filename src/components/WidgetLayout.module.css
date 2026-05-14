@@ -1,7 +1,8 @@
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .backLink {
@@ -20,6 +21,7 @@
 .columns {
   display: flex;
   flex: 1;
+  min-height: 0;
 }
 
 .sidebar {
@@ -32,5 +34,7 @@
 
 .main {
   flex: 1;
+  min-height: 0;
+  min-width: 0;
   overflow: auto;
 }
