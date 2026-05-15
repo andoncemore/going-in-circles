@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import WidgetLayout from '../../components/WidgetLayout'
 import { useFont } from './font'
+import { computeLayout } from './layout'
+import { ROUNDABOUT_PATH } from './roundabout-path'
 import styles from './styles.module.css'
 
 export default function LogoWidget() {
@@ -10,6 +12,12 @@ export default function LogoWidget() {
 
   const ready = fontState.status === 'ready'
   const canExport = ready && text.length > 0
+
+  const svgRef = useRef<SVGSVGElement>(null)
+  const layout = useMemo(
+    () => (fontState.status === 'ready' ? computeLayout(fontState.font, text, width) : null),
+    [fontState, text, width]
+  )
 
   const sidebar = (
     <div className={styles.sidebarInner}>
@@ -60,7 +68,21 @@ export default function LogoWidget() {
   const main = (
     <div className={styles.previewWrap}>
       {!ready && <span className={styles.placeholder}>Waiting for font…</span>}
-      {ready && <span className={styles.placeholder}>Type a location to preview.</span>}
+      {ready && layout && (
+        <svg
+          ref={svgRef}
+          className={styles.previewSvg}
+          width={layout.width}
+          height={layout.height}
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g transform={layout.topTransform}>
+            <path d={ROUNDABOUT_PATH} fill="#66381E" />
+          </g>
+          {layout.textPathD && <path d={layout.textPathD} fill="#66381E" />}
+        </svg>
+      )}
     </div>
   )
 
