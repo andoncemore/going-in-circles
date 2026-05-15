@@ -6,8 +6,17 @@ import { ROUNDABOUT_PATH } from './roundabout-path'
 import { serializeSvg, rasterizeToPng, downloadBlob, slugify } from './export'
 import styles from './styles.module.css'
 
+const COLORS = [
+  { name: 'Rust', hex: '#66381E' },
+  { name: 'Yellow', hex: '#F5BF4A' },
+  { name: 'Dusty Blue', hex: '#45697D' },
+  { name: 'Powder Blue', hex: '#BACFD6' },
+  { name: 'White', hex: '#FFFFFF' },
+]
+
 export default function LogoWidget() {
   const [text, setText] = useState('')
+  const [color, setColor] = useState(COLORS[0].hex)
   const [exportWidth, setExportWidth] = useState(320)
   const fontState = useFont()
 
@@ -55,6 +64,25 @@ export default function LogoWidget() {
           value={text}
           onChange={e => setText(e.target.value.toUpperCase())}
         />
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.fieldLabel}>Color</span>
+        <div className={styles.swatchRow} role="radiogroup" aria-label="Logo color">
+          {COLORS.map(c => (
+            <button
+              key={c.hex}
+              type="button"
+              role="radio"
+              aria-checked={color === c.hex}
+              aria-label={c.name}
+              title={c.name}
+              className={`${styles.swatch} ${color === c.hex ? styles.swatchSelected : ''}`}
+              style={{ background: c.hex }}
+              onClick={() => setColor(c.hex)}
+            />
+          ))}
+        </div>
       </div>
 
       <div className={styles.spacer} />
@@ -110,9 +138,9 @@ export default function LogoWidget() {
           xmlns="http://www.w3.org/2000/svg"
         >
           <g transform={layout.topTransform}>
-            <path d={ROUNDABOUT_PATH} fill="#66381E" />
+            <path d={ROUNDABOUT_PATH} fill={color} />
           </g>
-          {layout.textPathD && <path d={layout.textPathD} fill="#66381E" />}
+          {layout.textPathD && <path d={layout.textPathD} fill={color} />}
         </svg>
       )}
     </div>

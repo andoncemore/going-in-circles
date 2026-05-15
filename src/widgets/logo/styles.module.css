@@ -121,6 +121,40 @@
   cursor: not-allowed;
 }
 
+.swatchRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s ease;
+}
+
+.swatch:hover {
+  transform: scale(1.08);
+}
+
+.swatch:focus-visible {
+  box-shadow: 0 0 0 2px #888;
+}
+
+.swatchSelected {
+  box-shadow: 0 0 0 2px #1a1a1a;
+}
+
+.swatchSelected:focus-visible {
+  box-shadow: 0 0 0 2px #1a1a1a;
+}
+
 .previewWrap {
   display: flex;
   align-items: center;
@@ -129,6 +163,7 @@
   height: 100%;
   padding: 32px;
   box-sizing: border-box;
+  background: #f5f5f5;
 }
 
 .previewSvg {
