@@ -8,7 +8,7 @@ import styles from './styles.module.css'
 
 export default function LogoWidget() {
   const [text, setText] = useState('')
-  const [width, setWidth] = useState(320)
+  const [exportWidth, setExportWidth] = useState(320)
   const fontState = useFont()
 
   const ready = fontState.status === 'ready'
@@ -16,8 +16,8 @@ export default function LogoWidget() {
 
   const svgRef = useRef<SVGSVGElement>(null)
   const layout = useMemo(
-    () => (fontState.status === 'ready' ? computeLayout(fontState.font, text, width) : null),
-    [fontState, text, width]
+    () => (fontState.status === 'ready' ? computeLayout(fontState.font, text, exportWidth) : null),
+    [fontState, text, exportWidth]
   )
 
   const [pngError, setPngError] = useState<string | null>(null)
@@ -44,7 +44,7 @@ export default function LogoWidget() {
   const sidebar = (
     <div className={styles.sidebarInner}>
       <h2 className={styles.title}>Roundabout Logo Generator</h2>
-      <p className={styles.description}>Type a location, set a width, download SVG or PNG.</p>
+      <p className={styles.description}>Type a location, then download as SVG or PNG.</p>
 
       <div className={styles.field}>
         <label className={styles.fieldLabel} htmlFor="logo-text">Location name</label>
@@ -57,37 +57,37 @@ export default function LogoWidget() {
         />
       </div>
 
-      <div className={styles.field}>
-        <label className={styles.fieldLabel} htmlFor="logo-width">Width (px)</label>
-        <input
-          id="logo-width"
-          className={styles.input}
-          type="number"
-          min={100}
-          max={2000}
-          value={width}
-          onChange={e => setWidth(Number(e.target.value) || 0)}
-          onBlur={() => setWidth(w => Math.max(100, Math.min(2000, w || 100)))}
-        />
-      </div>
+      <div className={styles.spacer} />
 
       {fontState.status === 'loading' && <p className={styles.status}>Loading font…</p>}
       {fontState.status === 'error' && (
         <p className={styles.statusError}>Font failed to load: {fontState.error}</p>
       )}
-
       {pngError && <p className={styles.statusError}>PNG export failed: {pngError}</p>}
 
       <div className={styles.actions}>
+        <div className={styles.exportField}>
+          <label className={styles.fieldLabel} htmlFor="logo-export-width">Export width (px)</label>
+          <input
+            id="logo-export-width"
+            className={styles.input}
+            type="number"
+            min={100}
+            max={4000}
+            value={exportWidth}
+            onChange={e => setExportWidth(Number(e.target.value) || 0)}
+            onBlur={() => setExportWidth(w => Math.max(100, Math.min(4000, w || 100)))}
+          />
+        </div>
         <button
-          className={`${styles.button} ${styles.primary}`}
+          className={styles.primaryBtn}
           disabled={!canExport}
           onClick={handleDownloadSvg}
         >
           Download SVG
         </button>
         <button
-          className={`${styles.button} ${styles.secondary}`}
+          className={styles.downloadBtn}
           disabled={!canExport}
           onClick={handleDownloadPng}
         >
