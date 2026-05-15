@@ -12,44 +12,9 @@ export function loadFont(): Promise<Font> {
         if (!res.ok) throw new Error(`Failed to fetch font: ${res.status} ${res.statusText}`)
         return res.arrayBuffer()
       })
-      .then(buf => {
-        const font = parse(buf)
-        patchFont(font)
-        return font
-      })
+      .then(buf => parse(buf))
   }
   return cached
-}
-
-/**
- * opentype.js v2 throws on GSUB lookup type 6 / subtable format 2 (context
- * substitution format 2), which the Santa Ana font's CCMP feature uses.
- * Clearing the affected lookup subtables makes getPath() work without changing
- * glyph shapes — CCMP here only affects optional ligatures we don't use for
- * uppercase Latin text.
- *
- * Idempotent: safe to call multiple times on the same Font.
- */
-export function patchFont(font: Font): void {
-  const gsub = (font as unknown as {
-    tables: {
-      gsub?: {
-        features: Array<{ tag: string; feature: { lookupListIndexes: number[] } }>
-        lookups: Array<{ lookupType: number; subtables: unknown[] }>
-      }
-    }
-  }).tables.gsub
-  if (!gsub) return
-  for (const featureRecord of gsub.features) {
-    if (featureRecord.tag === 'ccmp') {
-      for (const idx of featureRecord.feature.lookupListIndexes) {
-        const lookup = gsub.lookups[idx]
-        if (lookup && lookup.lookupType === 6) {
-          lookup.subtables = []
-        }
-      }
-    }
-  }
 }
 
 export type FontState =

@@ -3,8 +3,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parse, type Font } from 'opentype.js'
 import { FONT_PATH } from './font'
-import { computeLayout } from './layout'
-import { patchFont } from './font'
+import { computeLayout, buildTextPath } from './layout'
 
 let font: Font
 
@@ -13,9 +12,6 @@ beforeAll(() => {
   const onDisk = resolve(__dirname, '../../../public', FONT_PATH.replace(/^\//, ''))
   const buf = readFileSync(onDisk)
   font = parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
-  // opentype.js v2 doesn't support GSUB lookup type 6 / substFormat 2 used by this
-  // font's CCMP feature. Patch it out so font.getPath() works in test assertions.
-  patchFont(font)
 })
 
 describe('computeLayout — empty text', () => {
@@ -34,14 +30,14 @@ describe('computeLayout — non-empty text', () => {
     const layout = computeLayout(font, 'BROOKLYN', 320)
     expect(layout.textPathD).not.toBeNull()
     expect(layout.fontSize).toBeDefined()
-    const p = font.getPath('BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
+    const p = buildTextPath(font, 'BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
     const bb = p.getBoundingBox()
     expect(bb.x2 - bb.x1).toBeCloseTo(320, 1)
   })
 
   it('positions text so the left ink edge sits at x = 0', () => {
     const layout = computeLayout(font, 'BROOKLYN', 320)
-    const p = font.getPath('BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
+    const p = buildTextPath(font, 'BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
     const bb = p.getBoundingBox()
     expect(bb.x1).toBeCloseTo(0, 1)
   })
@@ -54,7 +50,7 @@ describe('computeLayout — non-empty text', () => {
 
   it('height = topH + gap + (ascent + descent) * scale', () => {
     const layout = computeLayout(font, 'BROOKLYN', 320)
-    const ref = font.getPath('BROOKLYN', 0, 0, 100)
+    const ref = buildTextPath(font, 'BROOKLYN', 0, 0, 100)
     const bb = ref.getBoundingBox()
     const inkW = bb.x2 - bb.x1
     const s = 320 / inkW
