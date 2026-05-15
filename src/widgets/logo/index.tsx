@@ -3,6 +3,7 @@ import WidgetLayout from '../../components/WidgetLayout'
 import { useFont } from './font'
 import { computeLayout } from './layout'
 import { ROUNDABOUT_PATH } from './roundabout-path'
+import { serializeSvg, downloadBlob, slugify } from './export'
 import styles from './styles.module.css'
 
 export default function LogoWidget() {
@@ -18,6 +19,13 @@ export default function LogoWidget() {
     () => (fontState.status === 'ready' ? computeLayout(fontState.font, text, width) : null),
     [fontState, text, width]
   )
+
+  function handleDownloadSvg() {
+    if (!svgRef.current) return
+    const svgString = serializeSvg(svgRef.current)
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+    downloadBlob(blob, `roundabout-${slugify(text)}.svg`)
+  }
 
   const sidebar = (
     <div className={styles.sidebarInner}>
@@ -55,7 +63,11 @@ export default function LogoWidget() {
       )}
 
       <div className={styles.actions}>
-        <button className={`${styles.button} ${styles.primary}`} disabled={!canExport}>
+        <button
+          className={`${styles.button} ${styles.primary}`}
+          disabled={!canExport}
+          onClick={handleDownloadSvg}
+        >
           Download SVG
         </button>
         <button className={`${styles.button} ${styles.secondary}`} disabled={!canExport}>
