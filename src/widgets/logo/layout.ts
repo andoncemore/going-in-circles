@@ -14,32 +14,7 @@ export interface Layout {
 const NATIVE_GAP = 15
 const REF_FONT_SIZE = 100
 
-/**
- * opentype.js v2 does not support GSUB lookup type 6 / subtable format 2
- * (context substitution format 2). The Santa Ana font uses this in its CCMP
- * feature. Clearing the subtables of affected lookups makes getPath() work
- * without changing any glyph shapes — CCMP in this font is a presentational
- * ligature feature we don't need for bounding-box math.
- *
- * This function is idempotent: calling it more than once on the same font is safe.
- */
-export function patchFont(font: Font): void {
-  const gsub = (font as unknown as { tables: { gsub?: { features: Array<{ tag: string; feature: { lookupListIndexes: number[] } }>; lookups: Array<{ lookupType: number; subtables: unknown[] }> } } }).tables.gsub
-  if (!gsub) return
-  for (const featureRecord of gsub.features) {
-    if (featureRecord.tag === 'ccmp') {
-      for (const idx of featureRecord.feature.lookupListIndexes) {
-        const lookup = gsub.lookups[idx]
-        if (lookup && lookup.lookupType === 6) {
-          lookup.subtables = []
-        }
-      }
-    }
-  }
-}
-
 export function computeLayout(font: Font, text: string, width: number): Layout {
-  patchFont(font)
 
   const topScale = width / ROUNDABOUT_NATIVE_WIDTH
   const topH = ROUNDABOUT_NATIVE_HEIGHT * topScale

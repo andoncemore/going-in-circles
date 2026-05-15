@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parse, type Font } from 'opentype.js'
 import { FONT_PATH } from './font'
-import { computeLayout, patchFont } from './layout'
+import { computeLayout } from './layout'
+import { patchFont } from './font'
 
 let font: Font
 
