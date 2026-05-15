@@ -8,7 +8,6 @@ import { computeLayout, buildTextPath } from './layout'
 let font: Font
 
 beforeAll(() => {
-  // FONT_PATH is "/fonts/SantaAna-SemiBold.otf" (browser URL); on disk it lives under public/.
   const onDisk = resolve(__dirname, '../../../public', FONT_PATH.replace(/^\//, ''))
   const buf = readFileSync(onDisk)
   font = parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
@@ -19,7 +18,6 @@ describe('computeLayout — empty text', () => {
     const layout = computeLayout(font, '', 320)
     expect(layout.width).toBe(320)
     expect(layout.textPathD).toBeNull()
-    // topH at width=320 is exactly 42 (native)
     expect(layout.height).toBeCloseTo(42, 5)
     expect(layout.topTransform).toBe('scale(1)')
   })
@@ -30,16 +28,14 @@ describe('computeLayout — non-empty text', () => {
     const layout = computeLayout(font, 'BROOKLYN', 320)
     expect(layout.textPathD).not.toBeNull()
     expect(layout.fontSize).toBeDefined()
-    const p = buildTextPath(font, 'BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
-    const bb = p.getBoundingBox()
-    expect(bb.x2 - bb.x1).toBeCloseTo(320, 1)
+    const tp = buildTextPath(font, 'BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
+    expect(tp.bbox.x2 - tp.bbox.x1).toBeCloseTo(320, 1)
   })
 
   it('positions text so the left ink edge sits at x = 0', () => {
     const layout = computeLayout(font, 'BROOKLYN', 320)
-    const p = buildTextPath(font, 'BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
-    const bb = p.getBoundingBox()
-    expect(bb.x1).toBeCloseTo(0, 1)
+    const tp = buildTextPath(font, 'BROOKLYN', layout.textOriginX!, layout.textOriginY!, layout.fontSize!)
+    expect(tp.bbox.x1).toBeCloseTo(0, 1)
   })
 
   it('scales linearly: doubling width doubles font size', () => {
@@ -51,10 +47,15 @@ describe('computeLayout — non-empty text', () => {
   it('height = topH + gap + (ascent + descent) * scale', () => {
     const layout = computeLayout(font, 'BROOKLYN', 320)
     const ref = buildTextPath(font, 'BROOKLYN', 0, 0, 100)
-    const bb = ref.getBoundingBox()
-    const inkW = bb.x2 - bb.x1
+    const inkW = ref.bbox.x2 - ref.bbox.x1
     const s = 320 / inkW
-    const expectedHeight = 42 + 15 + (-bb.y1 + bb.y2) * s
+    const expectedHeight = 42 + 15 + (-ref.bbox.y1 + ref.bbox.y2) * s
     expect(layout.height).toBeCloseTo(expectedHeight, 2)
+  })
+
+  it('produces a textPathD with no NaN', () => {
+    const layout = computeLayout(font, 'D', 320)
+    expect(layout.textPathD).not.toBeNull()
+    expect(layout.textPathD!).not.toContain('NaN')
   })
 })

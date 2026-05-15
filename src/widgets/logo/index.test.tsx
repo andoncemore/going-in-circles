@@ -2,34 +2,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
-// Build a synthetic "font" that satisfies the shape buildTextPath uses:
-// charToGlyph → glyph.getPath → result.extend, plus getKerningValue.
+// Build a synthetic "font" matching the shape buildTextPath reads: unitsPerEm,
+// charToGlyph → glyph.path.commands (raw font-space coords) + advanceWidth.
 const UNITS_PER_EM = 1000
 const ADVANCE = 500
-function makeGlyph() {
-  return {
-    advanceWidth: ADVANCE,
-    getPath(x: number, y: number, fontSize: number) {
-      const scale = fontSize / UNITS_PER_EM
-      const w = ADVANCE * scale
-      const h = fontSize * 0.7
-      // A simple square-ish path so getBoundingBox + extend produce real numbers.
-      return {
-        commands: [
-          { type: 'M', x, y: y - h },
-          { type: 'L', x: x + w, y: y - h },
-          { type: 'L', x: x + w, y },
-          { type: 'L', x, y },
-          { type: 'Z' },
-        ],
-      }
-    },
-  }
+const fakeGlyph = {
+  advanceWidth: ADVANCE,
+  path: {
+    commands: [
+      { type: 'M', x: 0, y: 0 },
+      { type: 'L', x: ADVANCE, y: 0 },
+      { type: 'L', x: ADVANCE, y: 700 },
+      { type: 'L', x: 0, y: 700 },
+      { type: 'Z' },
+    ],
+  },
 }
 const fakeFont = {
   unitsPerEm: UNITS_PER_EM,
-  charToGlyph: vi.fn(() => makeGlyph()),
-  getKerningValue: vi.fn(() => 0),
+  charToGlyph: vi.fn(() => fakeGlyph),
 }
 
 vi.mock('./font', () => ({
