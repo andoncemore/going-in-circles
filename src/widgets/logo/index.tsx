@@ -3,7 +3,7 @@ import WidgetLayout from '../../components/WidgetLayout'
 import { useFont } from './font'
 import { computeLayout } from './layout'
 import { ROUNDABOUT_PATH } from './roundabout-path'
-import { serializeSvg, downloadBlob, slugify } from './export'
+import { serializeSvg, rasterizeToPng, downloadBlob, slugify } from './export'
 import styles from './styles.module.css'
 
 export default function LogoWidget() {
@@ -20,11 +20,25 @@ export default function LogoWidget() {
     [fontState, text, width]
   )
 
+  const [pngError, setPngError] = useState<string | null>(null)
+
   function handleDownloadSvg() {
     if (!svgRef.current) return
     const svgString = serializeSvg(svgRef.current)
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
     downloadBlob(blob, `roundabout-${slugify(text)}.svg`)
+  }
+
+  async function handleDownloadPng() {
+    if (!svgRef.current || !layout) return
+    setPngError(null)
+    try {
+      const svgString = serializeSvg(svgRef.current)
+      const blob = await rasterizeToPng(svgString, layout.width, layout.height)
+      downloadBlob(blob, `roundabout-${slugify(text)}.png`)
+    } catch (e) {
+      setPngError(String(e instanceof Error ? e.message : e))
+    }
   }
 
   const sidebar = (
@@ -62,6 +76,8 @@ export default function LogoWidget() {
         <p className={styles.statusError}>Font failed to load: {fontState.error}</p>
       )}
 
+      {pngError && <p className={styles.statusError}>PNG export failed: {pngError}</p>}
+
       <div className={styles.actions}>
         <button
           className={`${styles.button} ${styles.primary}`}
@@ -70,7 +86,11 @@ export default function LogoWidget() {
         >
           Download SVG
         </button>
-        <button className={`${styles.button} ${styles.secondary}`} disabled={!canExport}>
+        <button
+          className={`${styles.button} ${styles.secondary}`}
+          disabled={!canExport}
+          onClick={handleDownloadPng}
+        >
           Download PNG
         </button>
       </div>
