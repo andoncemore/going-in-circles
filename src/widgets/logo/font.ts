@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { load, type Font } from 'opentype.js'
+import { parse, type Font } from 'opentype.js'
 
 export const FONT_PATH = '/fonts/SantaAna-SemiBold.otf'
 
@@ -7,10 +7,16 @@ let cached: Promise<Font> | null = null
 
 export function loadFont(): Promise<Font> {
   if (!cached) {
-    cached = load(FONT_PATH).then(font => {
-      patchFont(font)
-      return font
-    })
+    cached = fetch(FONT_PATH)
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to fetch font: ${res.status} ${res.statusText}`)
+        return res.arrayBuffer()
+      })
+      .then(buf => {
+        const font = parse(buf)
+        patchFont(font)
+        return font
+      })
   }
   return cached
 }
