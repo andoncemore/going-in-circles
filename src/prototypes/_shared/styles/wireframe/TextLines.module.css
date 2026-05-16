@@ -1,0 +1,24 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.line {
+  height: 8px;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.onLight {
+  background: var(--wf-medium, #888888);
+}
+
+.onDark {
+  background: var(--wf-weak, #d8d8d8);
+}
+
+.last {
+  width: 60%;
+}
