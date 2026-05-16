@@ -37,7 +37,6 @@
 
 /* Heading scale */
 .root h1 {
-  font-family: Arial, sans-serif;
   font-weight: 700;
   font-size: 28px;
   line-height: 34px;
@@ -45,7 +44,6 @@
 }
 
 .root h2 {
-  font-family: Arial, sans-serif;
   font-weight: 700;
   font-size: 22px;
   line-height: 28px;
@@ -53,7 +51,6 @@
 }
 
 .root h3 {
-  font-family: Arial, sans-serif;
   font-weight: 700;
   font-size: 16px;
   line-height: 20px;
