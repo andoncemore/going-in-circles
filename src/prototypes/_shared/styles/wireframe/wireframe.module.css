@@ -1,0 +1,87 @@
+.root {
+  /* Palette */
+  --wf-ink: #1a1a1a;
+  --wf-strong: #2a2a2a;
+  --wf-medium: #888888;
+  --wf-weak: #d8d8d8;
+  --wf-surface: #ffffff;
+  --wf-canvas: #f1f1f1;
+
+  /* Radii */
+  --wf-radius-sm: 6px;
+  --wf-radius-md: 12px;
+  --wf-radius-lg: 20px;
+
+  /* Canvas */
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+
+  background-color: var(--wf-canvas);
+  background-image: radial-gradient(circle, #c8c8c8 1px, transparent 1px);
+  background-size: 14px 14px;
+
+  /* Typography */
+  font-family: Arial, sans-serif;
+  color: var(--wf-ink);
+}
+
+/* Icons inside the wireframe pick up ink color by default */
+.root svg {
+  color: var(--wf-ink);
+}
+
+/* Heading scale */
+.root h1 {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 34px;
+  margin: 0;
+}
+
+.root h2 {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  margin: 0;
+}
+
+.root h3 {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  margin: 0;
+}
+
+/* Plain buttons inside the wireframe get the dark-fill chrome */
+.root button {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--wf-surface);
+  background: var(--wf-ink);
+  border: none;
+  border-radius: var(--wf-radius-md);
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+/* Utility: white sheet/card chrome */
+.card {
+  background: var(--wf-surface);
+  border-radius: var(--wf-radius-md);
+  padding: 16px;
+}
+
+/* Utility: render real text as Flow Circular squiggles */
+.placeholder {
+  font-family: 'Flow Circular', Arial, sans-serif;
+  color: var(--wf-medium);
+}
