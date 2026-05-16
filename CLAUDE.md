@@ -6,6 +6,8 @@ A personal internal tool site for the Roundabout team. It hosts a growing collec
 
 Each tool ("widget") lets a team member provide some inputs, preview output, and export in useful formats (SVG, PNG, etc). Some widgets may call the Anthropic API to generate or transform content.
 
+The site also hosts "prototypes" — one-off explorations like visual studies or mockups. Prototypes are listed in a separate section on the home page and live under `/prototypes/<slug>` routes.
+
 ## Stack
 
 - **Vite + React 19 + TypeScript** — frontend build and component framework
@@ -29,10 +31,12 @@ npm run preview   # preview production build locally
 src/
   widgets.ts          # Widget registry — add new widgets here
   widgets/            # One subfolder per widget
+  prototypes.ts       # Prototype registry — add new prototypes here
+  prototypes/         # One subfolder per prototype (paths must start with /prototypes/)
   pages/
-    Home.tsx          # Gallery page (reads from registry)
+    Home.tsx          # Gallery page (reads from both registries)
   components/
-    WidgetLayout.tsx  # Shared two-column shell for widget pages
+    WidgetLayout.tsx  # Shared two-column shell for widget pages (optional for prototypes)
 netlify/
   functions/          # Serverless API proxy functions (add per widget as needed)
 public/
@@ -59,6 +63,29 @@ export const widgets: Widget[] = [
 ```
 
 That's it — the home page gallery and the router both update automatically.
+
+## Adding a New Prototype
+
+Prototypes are like widgets but freeform — they don't have to use `WidgetLayout` and can be any shape (e.g., a mobile-sized container, a full-bleed canvas).
+
+1. Create a folder under `src/prototypes/your-prototype-name/` with an `index.tsx`
+2. Build the prototype however the exploration needs — no required shell.
+3. Add one entry to `src/prototypes.ts`:
+
+```ts
+import { lazy } from 'react'
+
+export const prototypes: Prototype[] = [
+  {
+    name: 'Your Prototype Name',
+    description: 'Short description shown on the home page',
+    path: '/prototypes/your-prototype-name',  // must start with /prototypes/
+    component: lazy(() => import('./prototypes/your-prototype-name')),
+  },
+]
+```
+
+The "Prototypes" section on the home page appears automatically once the registry has at least one entry, and is hidden when the registry is empty.
 
 ## Anthropic API
 
