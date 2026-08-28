@@ -6,10 +6,10 @@ describe('widgets registry', () => {
     expect(Array.isArray(widgets)).toBe(true)
   })
 
-  it('registers the chicago.com logo generator', () => {
+  it('registers the Chicago logo generator', () => {
     const entry = widgets.find((widget) => widget.path === '/chicago-logo')
     expect(entry).toBeDefined()
-    expect(entry!.name).toMatch(/chicago/i)
+    expect(entry!.name).toBe('Chicago Logo Generator')
   })
 
   it('each entry has required string fields and a path starting with /', () => {

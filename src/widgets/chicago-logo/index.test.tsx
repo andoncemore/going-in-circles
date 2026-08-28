@@ -58,6 +58,11 @@ describe('ChicagoLogoWidget', () => {
     vi.clearAllMocks()
   })
 
+  it('is titled Chicago Logo Generator', () => {
+    renderWidget()
+    expect(screen.getByRole('heading', { name: 'Chicago Logo Generator' })).toBeInTheDocument()
+  })
+
   it('renders the neighborhood name and export height inputs', () => {
     renderWidget()
     expect(screen.getByLabelText(/neighborhood name/i)).toBeInTheDocument()

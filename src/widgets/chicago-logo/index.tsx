@@ -83,7 +83,7 @@ export default function ChicagoLogoWidget() {
 
   const sidebar = (
     <div className={styles.sidebarInner}>
-      <h2 className={styles.title}>chicago.com Logo Generator</h2>
+      <h2 className={styles.title}>Chicago Logo Generator</h2>
       <p className={styles.description}>Type a neighborhood, then download as SVG or PNG.</p>
 
       <div className={styles.field}>
