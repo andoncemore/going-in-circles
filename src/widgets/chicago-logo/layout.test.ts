@@ -103,6 +103,58 @@ describe('computeLayout — scaling', () => {
   })
 })
 
+describe('computeLayout — ascender drop', () => {
+  // Text starting with a tall letter sits 8px lower at native size, so the
+  // wordmark stays optically centred against the mark.
+  const NATIVE_BASELINE = 81.01
+  const DROP = 8
+
+  it('leaves x-height starts on the mockup baseline', () => {
+    expect(computeLayout(font, 'uptown', MARK_NATIVE_HEIGHT).baselineY).toBeCloseTo(NATIVE_BASELINE, 2)
+  })
+
+  it('drops starts with an ascender stem', () => {
+    expect(computeLayout(font, 'logan square', MARK_NATIVE_HEIGHT).baselineY)
+      .toBeCloseTo(NATIVE_BASELINE + DROP, 2)
+  })
+
+  it('drops starts with a dotted letter', () => {
+    expect(computeLayout(font, 'irving park', MARK_NATIVE_HEIGHT).baselineY)
+      .toBeCloseTo(NATIVE_BASELINE + DROP, 2)
+  })
+
+  it('applies the drop from the first letter only', () => {
+    // 'a' is x-height, even though 'l' and 'b' follow it
+    expect(computeLayout(font, 'albany bank', MARK_NATIVE_HEIGHT).baselineY)
+      .toBeCloseTo(NATIVE_BASELINE, 2)
+  })
+
+  it('scales the drop with the export height', () => {
+    const big = computeLayout(font, 'logan square', MARK_NATIVE_HEIGHT * 3)
+    expect(big.baselineY).toBeCloseTo((NATIVE_BASELINE + DROP) * 3, 2)
+  })
+
+  it('partitions the alphabet and digits exactly', () => {
+    const shifted = 'bdfhklijt0123456789'
+    const unshifted = 'acegmnopqrsuvwxyz'
+    for (const ch of shifted) {
+      const layout = computeLayout(font, ch, MARK_NATIVE_HEIGHT)
+      expect(layout.baselineY, `"${ch}" should drop`).toBeCloseTo(NATIVE_BASELINE + DROP, 2)
+    }
+    for (const ch of unshifted) {
+      const layout = computeLayout(font, ch, MARK_NATIVE_HEIGHT)
+      expect(layout.baselineY, `"${ch}" should not drop`).toBeCloseTo(NATIVE_BASELINE, 2)
+    }
+  })
+
+  it('keeps dropped descenders inside the mark box', () => {
+    const layout = computeLayout(font, 'humboldt park', MARK_NATIVE_HEIGHT)
+    const ink = textInk(layout, 'humboldt park')
+    expect(ink.y2).toBeLessThanOrEqual(MARK_NATIVE_HEIGHT)
+    expect(layout.height).toBe(MARK_NATIVE_HEIGHT)
+  })
+})
+
 describe('computeLayout — robustness', () => {
   it('produces path data with no NaN', () => {
     const layout = computeLayout(font, 'wicker park', 200)

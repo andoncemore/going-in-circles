@@ -96,24 +96,24 @@ describe('ChicagoLogoWidget', () => {
     expect(container.querySelector('svg text')).toBeNull()
   })
 
-  it('defaults to a magenta mark and black wordmark', () => {
+  it('defaults to a magenta mark and blue wordmark', () => {
     const { container } = renderWidget()
     fireEvent.change(screen.getByLabelText(/neighborhood name/i), { target: { value: 'uptown' } })
     for (const p of markPaths(container)) {
       expect(p.getAttribute('fill')).toBe('#BE189E')
     }
-    expect(textPath(container)!.getAttribute('fill')).toBe('#000000')
+    expect(textPath(container)!.getAttribute('fill')).toBe('#1966FF')
   })
 
   it('recolors only the mark when a mark color is picked', () => {
     const { container } = renderWidget()
     fireEvent.change(screen.getByLabelText(/neighborhood name/i), { target: { value: 'uptown' } })
     const group = screen.getByRole('radiogroup', { name: /mark color/i })
-    fireEvent.click(within(group).getByRole('radio', { name: /blue/i }))
+    fireEvent.click(within(group).getByRole('radio', { name: /black/i }))
     for (const p of markPaths(container)) {
-      expect(p.getAttribute('fill')).toBe('#1966FF')
+      expect(p.getAttribute('fill')).toBe('#000000')
     }
-    expect(textPath(container)!.getAttribute('fill')).toBe('#000000')
+    expect(textPath(container)!.getAttribute('fill')).toBe('#1966FF')
   })
 
   it('recolors only the wordmark when a text color is picked', () => {

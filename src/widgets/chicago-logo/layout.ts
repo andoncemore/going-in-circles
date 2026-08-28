@@ -23,6 +23,31 @@ const NATIVE_TRACKING = -0.02 * NATIVE_FONT_SIZE
 const NATIVE_GAP = 9.83
 const NATIVE_BASELINE_Y = 81.01
 
+// Text beginning with a tall letter is dropped so the wordmark stays optically
+// centred against the mark. 8 (native) keeps descenders inside the mark box:
+// they reach 101.01 undropped, 109.01 dropped, against a box of 112.
+const NATIVE_ASCENDER_DROP = 8
+
+// "Tall" is measured, not a letter list: the first glyph's ink top compared
+// against x-height. The margin clears the overshoot on round letters (o, e, c
+// rise ~3% above the flat x-height letters) while still catching t, the
+// shortest letter that counts, and the dots on i and j.
+const TALL_RATIO = 1.15
+
+function inkTop(font: Font, ch: string): number {
+  const { y1 } = buildTextPath(font, ch, 0, 0, NATIVE_FONT_SIZE).bbox
+  return isFinite(y1) ? -y1 : 0
+}
+
+/** True when `text` starts with a letter rising meaningfully above x-height. */
+export function startsTall(font: Font, text: string): boolean {
+  const first = Array.from(text)[0]
+  if (!first) return false
+  const xHeight = inkTop(font, 'x')
+  if (xHeight <= 0) return false
+  return inkTop(font, first) > xHeight * TALL_RATIO
+}
+
 /**
  * Lay out `mark + gap + wordmark` at the requested mark height. The width is
  * whatever the text needs — the box ends flush with the text's right ink edge.
@@ -50,7 +75,8 @@ export function computeLayout(font: Font, text: string, height: number): Chicago
 
   const fontSize = NATIVE_FONT_SIZE * scale
   const letterSpacing = NATIVE_TRACKING * scale
-  const baselineY = NATIVE_BASELINE_Y * scale
+  const drop = startsTall(font, text) ? NATIVE_ASCENDER_DROP : 0
+  const baselineY = (NATIVE_BASELINE_Y + drop) * scale
 
   // Measure at the origin first so the text can be placed by its ink edge
   // rather than by the leading glyph's side bearing.

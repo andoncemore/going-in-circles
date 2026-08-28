@@ -47,7 +47,7 @@ function SwatchRow({ label, value, onChange }: SwatchRowProps) {
 export default function ChicagoLogoWidget() {
   const [text, setText] = useState('')
   const [markColor, setMarkColor] = useState('#BE189E')
-  const [textColor, setTextColor] = useState('#000000')
+  const [textColor, setTextColor] = useState('#1966FF')
   const [exportHeight, setExportHeight] = useState(DEFAULT_HEIGHT)
   const fontState = useFont()
 
