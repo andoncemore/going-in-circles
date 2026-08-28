@@ -16,6 +16,12 @@ export const widgets: Widget[] = [
     component: lazy(() => import('./widgets/logo')),
   },
   {
+    name: 'chicago.com Logo Generator',
+    description: 'Generate the chicago.com neighborhood logo as SVG or PNG',
+    path: '/chicago-logo',
+    component: lazy(() => import('./widgets/chicago-logo')),
+  },
+  {
     name: 'Newsletter Map',
     description: 'Generate a styled map graphic for newsletters',
     path: '/newsletter-map',

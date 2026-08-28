@@ -6,6 +6,12 @@ describe('widgets registry', () => {
     expect(Array.isArray(widgets)).toBe(true)
   })
 
+  it('registers the chicago.com logo generator', () => {
+    const entry = widgets.find((widget) => widget.path === '/chicago-logo')
+    expect(entry).toBeDefined()
+    expect(entry!.name).toMatch(/chicago/i)
+  })
+
   it('each entry has required string fields and a path starting with /', () => {
     widgets.forEach((widget) => {
       expect(typeof widget.name).toBe('string')
