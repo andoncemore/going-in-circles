@@ -2,8 +2,9 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parse, type Font } from 'opentype.js'
+import { buildTextPath } from '../_shared/text-path'
 import { FONT_PATH } from './font'
-import { computeLayout, buildTextPath } from './layout'
+import { computeLayout } from './layout'
 
 let font: Font
 

@@ -3,7 +3,7 @@ import WidgetLayout from '../../components/WidgetLayout'
 import { useFont } from './font'
 import { computeLayout } from './layout'
 import { ROUNDABOUT_PATH } from './roundabout-path'
-import { serializeSvg, rasterizeToPng, downloadBlob, slugify } from './export'
+import { serializeSvg, rasterizeToPng, downloadBlob, slugify } from '../_shared/export'
 import styles from './styles.module.css'
 
 const COLORS = [
@@ -35,7 +35,7 @@ export default function LogoWidget() {
     if (!svgRef.current) return
     const svgString = serializeSvg(svgRef.current)
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
-    downloadBlob(blob, `roundabout-${slugify(text)}.svg`)
+    downloadBlob(blob, `roundabout-${slugify(text, 'roundabout')}.svg`)
   }
 
   async function handleDownloadPng() {
@@ -44,7 +44,7 @@ export default function LogoWidget() {
     try {
       const svgString = serializeSvg(svgRef.current)
       const blob = await rasterizeToPng(svgString, layout.width, layout.height)
-      downloadBlob(blob, `roundabout-${slugify(text)}.png`)
+      downloadBlob(blob, `roundabout-${slugify(text, 'roundabout')}.png`)
     } catch (e) {
       setPngError(String(e instanceof Error ? e.message : e))
     }

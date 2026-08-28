@@ -29,15 +29,15 @@ vi.mock('./font', () => ({
   useFont: () => ({ status: 'ready', font: fakeFont }),
 }))
 
-vi.mock('./export', () => ({
+vi.mock('../_shared/export', () => ({
   serializeSvg: vi.fn(() => '<svg/>'),
   rasterizeToPng: vi.fn(() => Promise.resolve(new Blob(['png'], { type: 'image/png' }))),
   downloadBlob: vi.fn(),
-  slugify: (s: string) => s.toLowerCase() || 'roundabout',
+  slugify: (s: string, fallback = 'logo') => s.toLowerCase() || fallback,
 }))
 
 import LogoWidget from './index'
-import * as exportModule from './export'
+import * as exportModule from '../_shared/export'
 
 function renderWidget() {
   return render(

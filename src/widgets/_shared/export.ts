@@ -40,6 +40,6 @@ export async function rasterizeToPng(svgString: string, width: number, height: n
   })
 }
 
-export function slugify(text: string): string {
-  return text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'roundabout'
+export function slugify(text: string, fallback = 'logo'): string {
+  return text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || fallback
 }
