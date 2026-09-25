@@ -2,14 +2,14 @@ import { useState, useRef, useMemo } from 'react'
 import WidgetLayout from '../../components/WidgetLayout'
 import { serializeSvg, rasterizeToPng, downloadBlob, slugify } from '../_shared/export'
 import { useFont } from './font'
-import { computeLayout } from './layout'
-import { MARK_PATHS } from './mark-path'
+import { computeLayout, splitLines } from './layout'
+import { PINWHEEL_PATHS, SLASH_PATH } from './mark-path'
 import styles from './styles.module.css'
 
 const COLORS = [
   { name: 'Black', hex: '#000000' },
   { name: 'White', hex: '#FFFFFF' },
-  { name: 'Magenta', hex: '#BE189E' },
+  { name: 'Magenta', hex: '#C903A3' },
   { name: 'Blue', hex: '#1966FF' },
 ]
 
@@ -46,9 +46,10 @@ function SwatchRow({ label, value, onChange }: SwatchRowProps) {
 
 export default function ChicagoLogoWidget() {
   const [text, setText] = useState('')
-  const [markColor, setMarkColor] = useState('#BE189E')
+  const [markColor, setMarkColor] = useState('#C903A3')
   const [textColor, setTextColor] = useState('#1966FF')
   const [exportHeight, setExportHeight] = useState(DEFAULT_HEIGHT)
+  const [interactive, setInteractive] = useState(false)
   const fontState = useFont()
 
   const ready = fontState.status === 'ready'
@@ -56,8 +57,8 @@ export default function ChicagoLogoWidget() {
 
   const svgRef = useRef<SVGSVGElement>(null)
   const layout = useMemo(
-    () => (fontState.status === 'ready' ? computeLayout(fontState.font, text, exportHeight) : null),
-    [fontState, text, exportHeight]
+    () => (fontState.status === 'ready' ? computeLayout(fontState.font, text, exportHeight, interactive ? 'interactive' : 'brand') : null),
+    [fontState, text, exportHeight, interactive]
   )
 
   const [pngError, setPngError] = useState<string | null>(null)
@@ -84,21 +85,39 @@ export default function ChicagoLogoWidget() {
   const sidebar = (
     <div className={styles.sidebarInner}>
       <h2 className={styles.title}>Chicago Logo Generator</h2>
-      <p className={styles.description}>Type a neighborhood, then download as SVG or PNG.</p>
+      <p className={styles.description}>
+        Type a neighborhood, then download as SVG or PNG. Press Enter for a two-line logo.
+      </p>
 
       <div className={styles.field}>
         <label className={styles.fieldLabel} htmlFor="chicago-text">Neighborhood name</label>
-        <input
+        <textarea
           id="chicago-text"
-          className={styles.input}
+          className={`${styles.input} ${styles.textarea}`}
           placeholder="uptown"
+          rows={2}
           value={text}
-          onChange={e => setText(e.target.value.toLowerCase())}
+          onChange={e => setText(splitLines(e.target.value.toLowerCase()).join('\n'))}
         />
       </div>
 
       <SwatchRow label="Mark color" value={markColor} onChange={setMarkColor} />
       <SwatchRow label="Text color" value={textColor} onChange={setTextColor} />
+
+      <label className={styles.checkboxField}>
+        <input
+          type="checkbox"
+          checked={interactive}
+          onChange={e => setInteractive(e.target.checked)}
+        />
+        <span>
+          Interactive spacing
+          <span className={styles.checkboxHint}>
+            Wider spacing used to enable an interactive “navigation” variant of the logo. This is
+            used in the community’s navbar.
+          </span>
+        </span>
+      </label>
 
       <div className={styles.spacer} />
 
@@ -155,10 +174,13 @@ export default function ChicagoLogoWidget() {
           viewBox={`0 ${layout.viewBoxMinY} ${layout.width} ${layout.height}`}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <g transform={layout.markTransform}>
-            {MARK_PATHS.map((d, i) => (
+          <g transform={layout.pinwheelTransform}>
+            {PINWHEEL_PATHS.map((d, i) => (
               <path key={i} d={d} fill={markColor} />
             ))}
+          </g>
+          <g transform={layout.slashTransform}>
+            <path d={SLASH_PATH} fill={markColor} />
           </g>
           {layout.textPathD && <path d={layout.textPathD} fill={textColor} />}
         </svg>

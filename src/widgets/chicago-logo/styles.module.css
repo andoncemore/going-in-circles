@@ -31,6 +31,25 @@
   letter-spacing: 0.04em;
 }
 
+.checkboxField {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+}
+
+.checkboxField input {
+  margin: 2px 0 0;
+}
+
+.checkboxHint {
+  display: block;
+  font-size: 12px;
+  color: #888;
+}
+
 .input {
   width: 100%;
   padding: 6px 8px;
@@ -40,6 +59,11 @@
   font-family: inherit;
   box-sizing: border-box;
   outline: none;
+}
+
+.textarea {
+  resize: vertical;
+  line-height: 1.4;
 }
 
 .input:focus {

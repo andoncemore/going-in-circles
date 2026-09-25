@@ -1,12 +1,25 @@
 // Path data for the chicago.com mark (pinwheel + slash), exported from the
 // "logo-beginning" vector in the Local Design System Figma file. All subpaths
 // share a single fill, applied by the widget.
+//
+// The pinwheel and slash are positioned independently by the layout, so each
+// has a viewBox fitted tightly around its own artwork — the same viewBoxes the
+// chicago.com nav component uses, so its size ratios describe the ink itself.
 
-export const MARK_NATIVE_WIDTH = 139.979
-export const MARK_NATIVE_HEIGHT = 112
+export interface ViewBox {
+  x: number
+  y: number
+  width: number
+  height: number
+}
 
-export const MARK_PATHS: string[] = [
-  'M134.278 0C136.119 0.539543 138.116 1.03659 139.979 1.53613C136.799 12.3835 133.828 24.3991 130.878 35.3828L110.274 112L104.604 110.453L134.278 0Z',
+export const SLASH_VIEWBOX: ViewBox = { x: 104.604, y: 0, width: 35.375, height: 112 }
+export const PINWHEEL_VIEWBOX: ViewBox = { x: 0, y: 5.91, width: 92.361, height: 100.169 }
+
+export const SLASH_PATH =
+  'M134.278 0C136.119 0.539543 138.116 1.03659 139.979 1.53613C136.799 12.3835 133.828 24.3991 130.878 35.3828L110.274 112L104.604 110.453L134.278 0Z'
+
+export const PINWHEEL_PATHS: string[] = [
   'M38.3486 74.25C39.251 74.0101 40.183 74.5397 40.4238 75.4395L48.0654 103.87C48.366 105 47.464 106.079 46.3008 105.989C30.777 104.769 17.2484 96.5399 8.88477 84.46C8.2229 83.5 8.70471 82.1701 9.83789 81.8701L38.3486 74.25Z',
   'M60.1602 75.4395C60.411 74.5396 61.3338 74.01 62.2363 74.25L90.7461 81.8701C91.8793 82.1701 92.3611 83.5 91.6992 84.46C83.3356 96.5299 69.797 104.769 54.2832 105.989C53.1201 106.079 52.218 104.99 52.5186 103.87L60.1602 75.4395Z',
   'M4.86328 34.46C5.36469 33.41 6.75944 33.1593 7.5918 33.9893L28.4707 54.8096V54.7998C29.1323 55.4697 29.1323 56.5295 28.4707 57.1895L7.5918 78.0098C6.75948 78.8297 5.36476 78.5899 4.86328 77.54C1.74451 71.0201 5.34006e-05 63.7099 0 56C0 48.2902 1.7446 40.9899 4.86328 34.46Z',

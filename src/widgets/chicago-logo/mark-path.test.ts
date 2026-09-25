@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { MARK_PATHS, MARK_NATIVE_WIDTH, MARK_NATIVE_HEIGHT } from './mark-path'
+import { PINWHEEL_PATHS, PINWHEEL_VIEWBOX, SLASH_PATH, SLASH_VIEWBOX, type ViewBox } from './mark-path'
 
 // Walk absolute path commands (what Figma emits) so H/V single-argument
 // commands don't misalign x/y pairing.
@@ -23,34 +23,41 @@ function points(d: string): Array<[number, number]> {
   return out
 }
 
-describe('chicago mark artwork', () => {
-  it('declares the Figma native size', () => {
-    expect(MARK_NATIVE_WIDTH).toBeCloseTo(139.979, 3)
-    expect(MARK_NATIVE_HEIGHT).toBe(112)
-  })
+function extent(paths: string[]) {
+  const xs: number[] = []
+  const ys: number[] = []
+  for (const d of paths) {
+    for (const [x, y] of points(d)) {
+      if (!Number.isNaN(x)) xs.push(x)
+      if (!Number.isNaN(y)) ys.push(y)
+    }
+  }
+  return { x1: Math.min(...xs), y1: Math.min(...ys), x2: Math.max(...xs), y2: Math.max(...ys) }
+}
 
+// Control points can overshoot the ink slightly, so allow half a unit.
+function expectTightFit(paths: string[], vb: ViewBox) {
+  const e = extent(paths)
+  expect(e.x1).toBeCloseTo(vb.x, 0)
+  expect(e.y1).toBeCloseTo(vb.y, 0)
+  expect(Math.abs(e.x2 - (vb.x + vb.width))).toBeLessThan(0.5)
+  expect(Math.abs(e.y2 - (vb.y + vb.height))).toBeLessThan(0.5)
+}
+
+describe('chicago mark artwork', () => {
   it('is a set of non-empty subpaths with no NaN', () => {
-    expect(MARK_PATHS.length).toBe(6)
-    for (const d of MARK_PATHS) {
+    expect(PINWHEEL_PATHS.length).toBe(5)
+    for (const d of [...PINWHEEL_PATHS, SLASH_PATH]) {
       expect(d.startsWith('M')).toBe(true)
       expect(d).not.toContain('NaN')
     }
   })
 
-  it('fills its declared box without overflowing it', () => {
-    const xs: number[] = []
-    const ys: number[] = []
-    for (const d of MARK_PATHS) {
-      for (const [x, y] of points(d)) {
-        if (!Number.isNaN(x)) xs.push(x)
-        if (!Number.isNaN(y)) ys.push(y)
-      }
-    }
-    expect(Math.min(...xs)).toBeGreaterThanOrEqual(-0.5)
-    expect(Math.min(...ys)).toBeGreaterThanOrEqual(-0.5)
-    expect(Math.max(...xs)).toBeLessThanOrEqual(MARK_NATIVE_WIDTH + 0.5)
-    expect(Math.max(...ys)).toBeLessThanOrEqual(MARK_NATIVE_HEIGHT + 0.5)
-    expect(Math.max(...xs)).toBeGreaterThan(MARK_NATIVE_WIDTH - 1)
-    expect(Math.max(...ys)).toBeGreaterThan(MARK_NATIVE_HEIGHT - 1)
+  it('has a pinwheel viewBox fitted tightly around its artwork', () => {
+    expectTightFit(PINWHEEL_PATHS, PINWHEEL_VIEWBOX)
+  })
+
+  it('has a slash viewBox fitted tightly around its artwork', () => {
+    expectTightFit([SLASH_PATH], SLASH_VIEWBOX)
   })
 })

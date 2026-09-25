@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { MARK_PATHS } from './mark-path'
+import { PINWHEEL_PATHS } from './mark-path'
+
+const MARK_PATH_COUNT = PINWHEEL_PATHS.length + 1
 
 // Synthetic font matching the shape buildTextPath reads: unitsPerEm,
 // charToGlyph → glyph.path.commands (raw font-space coords) + advanceWidth.
@@ -21,6 +23,8 @@ const fakeGlyph = {
 }
 const fakeFont = {
   unitsPerEm: UNITS_PER_EM,
+  ascender: 800,
+  descender: -200,
   charToGlyph: vi.fn(() => fakeGlyph),
 }
 
@@ -49,9 +53,9 @@ function renderWidget() {
 }
 
 const markPaths = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll('svg path')).slice(0, MARK_PATHS.length)
+  Array.from(container.querySelectorAll('svg path')).slice(0, MARK_PATH_COUNT)
 const textPath = (container: HTMLElement) =>
-  container.querySelectorAll('svg path')[MARK_PATHS.length] ?? null
+  container.querySelectorAll('svg path')[MARK_PATH_COUNT] ?? null
 
 describe('ChicagoLogoWidget', () => {
   beforeEach(() => {
@@ -67,6 +71,15 @@ describe('ChicagoLogoWidget', () => {
     renderWidget()
     expect(screen.getByLabelText(/neighborhood name/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/export height/i)).toBeInTheDocument()
+  })
+
+  it('keeps a line break for a two-line logo, and at most one', () => {
+    renderWidget()
+    const input = screen.getByLabelText(/neighborhood name/i) as HTMLTextAreaElement
+    fireEvent.change(input, { target: { value: 'little\nvillage' } })
+    expect(input.value).toBe('little\nvillage')
+    fireEvent.change(input, { target: { value: 'a\nb\nc' } })
+    expect(input.value).toBe('a\nb c')
   })
 
   it('lowercases typed text', () => {
@@ -91,13 +104,13 @@ describe('ChicagoLogoWidget', () => {
 
   it('renders the mark alone when text is empty', () => {
     const { container } = renderWidget()
-    expect(container.querySelectorAll('svg path').length).toBe(MARK_PATHS.length)
+    expect(container.querySelectorAll('svg path').length).toBe(MARK_PATH_COUNT)
   })
 
   it('adds one text path when text is entered', () => {
     const { container } = renderWidget()
     fireEvent.change(screen.getByLabelText(/neighborhood name/i), { target: { value: 'uptown' } })
-    expect(container.querySelectorAll('svg path').length).toBe(MARK_PATHS.length + 1)
+    expect(container.querySelectorAll('svg path').length).toBe(MARK_PATH_COUNT + 1)
     expect(container.querySelector('svg text')).toBeNull()
   })
 
@@ -105,7 +118,7 @@ describe('ChicagoLogoWidget', () => {
     const { container } = renderWidget()
     fireEvent.change(screen.getByLabelText(/neighborhood name/i), { target: { value: 'uptown' } })
     for (const p of markPaths(container)) {
-      expect(p.getAttribute('fill')).toBe('#BE189E')
+      expect(p.getAttribute('fill')).toBe('#C903A3')
     }
     expect(textPath(container)!.getAttribute('fill')).toBe('#1966FF')
   })
@@ -127,7 +140,7 @@ describe('ChicagoLogoWidget', () => {
     const group = screen.getByRole('radiogroup', { name: /text color/i })
     fireEvent.click(within(group).getByRole('radio', { name: /white/i }))
     expect(textPath(container)!.getAttribute('fill')).toBe('#FFFFFF')
-    expect(markPaths(container)[0].getAttribute('fill')).toBe('#BE189E')
+    expect(markPaths(container)[0].getAttribute('fill')).toBe('#C903A3')
   })
 
   it('shows the computed export width, which grows with longer text', () => {
@@ -149,6 +162,19 @@ describe('ChicagoLogoWidget', () => {
     fireEvent.change(screen.getByLabelText(/export height/i), { target: { value: '224' } })
     expect(Number(svg.getAttribute('height'))).toBe(224)
     expect(Number(svg.getAttribute('width'))).toBeCloseTo(baseW * 2, 4)
+  })
+
+  it('defaults to brand spacing and widens when interactive spacing is checked', () => {
+    renderWidget()
+    fireEvent.change(screen.getByLabelText(/neighborhood name/i), { target: { value: 'uptown' } })
+    const toggle = screen.getByRole('checkbox', { name: /interactive spacing/i })
+    expect(toggle).not.toBeChecked()
+    const width = () => Number(screen.getByTestId('computed-width').textContent!.replace(/\D/g, ''))
+    const brand = width()
+    fireEvent.click(toggle)
+    expect(width()).toBeGreaterThan(brand)
+    fireEvent.click(toggle)
+    expect(width()).toBe(brand)
   })
 
   it('downloads an SVG named after the text', () => {
